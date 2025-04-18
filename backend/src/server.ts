@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 3000;
 
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
-    cors: { origin: '*', methods: ['GET', 'POST'] },
-  });
+        cors: { origin: '*', methods: ['GET', 'POST'] },
+    });
 
 registerSocketHandlers(io);
 

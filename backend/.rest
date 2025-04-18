@@ -1,0 +1,11 @@
+### Register User
+##
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "name": "raffy",
+    "email": "rsffysolis123@gmail.com",
+    "password": "string",
+    "role": "ADMIN"
+}
