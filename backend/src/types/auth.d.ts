@@ -1,4 +1,4 @@
-export type JWEPayload = {
+export interface JWTPayload {
     userId: string;
     email: string;
 }

@@ -5,7 +5,23 @@ Content-Type: application/json
 
 {
     "name": "raffy",
-    "email": "rsffysolis123@gmail.com",
+    "email": "ffysolis123@gmail.com",
     "password": "string",
     "role": "ADMIN"
 }
+
+### Login User
+##
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "raffysolis123@gmail.com",
+    "password": "123"
+}
+
+###  User Profile
+##
+GET http://localhost:5000/api/auth/profile
+Content-Type: application/json
+Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODAyYTExYjIzMDUwYWZmODNlZWJjYWEiLCJlbWFpbCI6InJhZmZ5c29saXMxMjNAZ21haWwuY29tIiwiaWF0IjoxNzQ1MDc2MzI0LCJleHAiOjE3NDUxNjI3MjR9.jHWL1Uj79aoYL4duofxp5uzCnL3F5Tt_8kjXMSos-fk

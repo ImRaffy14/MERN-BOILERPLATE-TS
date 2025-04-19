@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
-import { encrypt, decrypt } from '../utils/jwe';
 import  prisma  from '../config/prisma';
-import { RegisterUser } from '../types/auth';
+import { RegisterUser, LoginUser } from '../types/auth';
 import { UserRole } from '@prisma/client';
 import { AppError } from '../utils/appError';
+import { generateToken } from '../utils/token';
 
 export const registerService = async (data: RegisterUser) => {
     const { name, email, password, role } = data;
@@ -29,4 +29,25 @@ export const registerService = async (data: RegisterUser) => {
 
     return user;
 
+}
+
+export const loginService = async (data: LoginUser) => {
+    const { email, password } = data;
+
+    const user = await prisma.user.findUnique({
+        where: { email },
+    });
+
+    if (!user) {
+        throw new AppError('Invalid email or password', 401);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        throw new AppError('Invalid email or password', 401);
+    }
+
+    const token = generateToken({ userId: user.id, email: user.email });
+
+    return { token };
 }

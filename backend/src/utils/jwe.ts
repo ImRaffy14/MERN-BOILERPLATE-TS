@@ -1,4 +1,3 @@
-// jwe.ts
 import { EncryptJWT, jwtDecrypt } from 'jose';
 import { createSecretKey } from 'crypto';
 import { JWEPayload } from '../types/auth';

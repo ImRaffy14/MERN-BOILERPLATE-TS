@@ -1,20 +1,48 @@
 import { NextFunction, Request, Response } from 'express';
-import { decrypt } from '../utils/jwe'; 
+import jwt from 'jsonwebtoken';
+import { JWTPayload } from '../types/auth';
 
+declare global {
+    namespace Express {
+        interface Request {
+            user?: JWTPayload;
+        }
+    }
+}
 
-export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies.token;
+export const verifyToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    const token = req.cookies.accessToken;
 
     if (!token) {
-        return res.status(401).json({ error: 'No token provided. Authorization denied.' });
+        res.status(401).json({ error: 'No token provided. Authorization denied.' });
+        return;
     }
 
     try {
-        const decoded = await decrypt(token);
-        
-        req.user = decoded;
-        next();
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+
+        if (typeof decoded === 'string') {
+        res.status(401).json({ error: 'Malformed token payload.' });
+        return;
+    }
+
+    // Type assertion to ensure the decoded payload matches JWTPayload
+    const payload = decoded as JWTPayload;
+    
+    // Validate required fields exist
+    if (!payload.userId || !payload.email) {
+        res.status(401).json({ error: 'Invalid token payload.' });
+        return;
+    }
+
+    req.user = payload;
+    next();
+    
     } catch (error) {
-        return res.status(401).json({ error: 'Invalid or expired token. Authorization denied.' });
+        res.status(401).json({ error: 'Invalid or expired token. Authorization denied.' });
     }
 };
