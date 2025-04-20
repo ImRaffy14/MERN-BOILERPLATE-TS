@@ -54,7 +54,7 @@ function Sidebar() {
         <button 
           className={`flex items-center ${collapsed ? "justify-center" : "justify-start"} w-full text-red-600 hover:bg-red-50 px-3 py-2 rounded-md`}
           onClick={() => {
-            // Add logout logic here
+            console.log("User logged out"); // Add logout logic here
           }}
         >
           <LogOut size={20} />
