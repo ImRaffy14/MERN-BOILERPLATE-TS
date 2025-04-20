@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { JWTPayload } from '../types/auth';
+import { JWTPayload } from '../types';
 
 declare global {
     namespace Express {
@@ -30,10 +30,8 @@ export const verifyToken = async (
         return;
     }
 
-    // Type assertion to ensure the decoded payload matches JWTPayload
     const payload = decoded as JWTPayload;
     
-    // Validate required fields exist
     if (!payload.userId || !payload.email) {
         res.status(401).json({ error: 'Invalid token payload.' });
         return;

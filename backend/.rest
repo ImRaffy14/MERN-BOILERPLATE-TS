@@ -5,7 +5,7 @@ Content-Type: application/json
 
 {
     "name": "raffy",
-    "email": "ffysolis123@gmail.com",
+    "": "ffysolis123@gmail.com",
     "password": "string",
     "role": "ADMIN"
 }
@@ -16,12 +16,18 @@ POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "raffysolis123@gmail.com",
-    "password": "123"
+    "email": "email",
+    "password": "string"
 }
 
 ###  User Profile
 ##
 GET http://localhost:5000/api/auth/profile
 Content-Type: application/json
-Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODAyYTExYjIzMDUwYWZmODNlZWJjYWEiLCJlbWFpbCI6InJhZmZ5c29saXMxMjNAZ21haWwuY29tIiwiaWF0IjoxNzQ1MDc2MzI0LCJleHAiOjE3NDUxNjI3MjR9.jHWL1Uj79aoYL4duofxp5uzCnL3F5Tt_8kjXMSos-fk
+Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA0YjZjYzI4ZGQ1ODkyZjk3ZmNlMDgiLCJlbWFpbCI6ImVtYWlsIiwiaWF0IjoxNzQ1MTQ1OTg1LCJleHAiOjE3NDUyMzIzODV9.E-r7YiA_oIyf3dgkcfoVpuK-DEXrd0DjlWcGYpDXQOk
+
+
+### Get Users
+##
+GET http://localhost:5000/api/account/users
+Content-Type: application/json

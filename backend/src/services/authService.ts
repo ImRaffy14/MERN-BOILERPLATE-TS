@@ -1,12 +1,13 @@
 import bcrypt from 'bcryptjs';
 import  prisma  from '../config/prisma';
-import { RegisterUser, LoginUser } from '../types/auth';
+import { RegisterUser, LoginUser } from '../types';
 import { UserRole } from '@prisma/client';
 import { AppError } from '../utils/appError';
 import { generateToken } from '../utils/token';
+import { uploadImage } from './imageUploadService';
 
-export const registerService = async (data: RegisterUser) => {
-    const { name, email, password, role } = data;
+export const registerService = async (data: RegisterUser, image: any) => {
+    const { name, email, password, role, } = data;
 
     const existingUser = await prisma.user.findUnique({
         where: { email },
@@ -16,20 +17,36 @@ export const registerService = async (data: RegisterUser) => {
         throw new AppError('User already exists', 400);
     }
 
+    if(!image){
+        throw new AppError('Image is required', 400);
+    }
+
+    const result = await uploadImage(image.buffer, 'users-avatar');
+    if (!result) {
+        throw new AppError('Image upload failed', 500);
+    }
+    
+
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const user = await prisma.user.create({
-        data: {
-            name,
-            email,
-            password: hashedPassword,
-            role: role as UserRole,
-        },
-    });
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: role as UserRole,
+                image: {
+                    imageUrl: result.url,
+                    publicId: result.public_id
+                },
+            },
+        });
 
     return user;
 
 }
+
+
 
 export const loginService = async (data: LoginUser) => {
     const { email, password } = data;

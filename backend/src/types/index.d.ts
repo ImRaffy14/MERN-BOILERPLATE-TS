@@ -8,7 +8,14 @@ export interface RegisterUser {
     email: string;
     password: string;
     role: string;
+    image: Image;
 }
+
+export interface Image {
+    imageUrl: string;
+    publicId: string;
+}
+
 
 export interface LoginUser {
     email: string;

@@ -1,6 +1,6 @@
 import { EncryptJWT, jwtDecrypt } from 'jose';
 import { createSecretKey } from 'crypto';
-import { JWEPayload } from '../types/auth';
+import { JWEPayload } from '../types';
 
 const secretKey = createSecretKey(
     Buffer.from(process.env.JWE_SECRET!, 'base64')

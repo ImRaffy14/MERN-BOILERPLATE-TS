@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { registerService, loginService } from '../services/authService';
 import { asyncHandler } from '../utils/asyncHandler';
+import prisma from '../config/prisma';
 
 export const registerUser = asyncHandler( async ( req: Request, res: Response) => {
-    const userRegistered = await registerService(req.body);
+    const userRegistered = await registerService(req.body, req.file);
     res.status(201).json({
         status: 'success',
         message: `User ${userRegistered.name} registered successfully`,
@@ -27,9 +28,13 @@ export const loginUser = asyncHandler( async ( req: Request, res: Response) => {
 })
 
 export const getUserProfile = asyncHandler( async ( req: Request, res: Response) => {
+    const userId = req.user?.userId;
+    const userData = await prisma.user.findUnique({
+        where: { id: userId },
+    })
     res.status(200).json({
         status: 'success',
-        user: req.user,
+        user: userData,
     })
 })
 
