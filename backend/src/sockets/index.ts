@@ -10,4 +10,4 @@ export default function registerSocketHandlers(io: Server) {
             console.log(`User disconnected: ${socket.id}`);
         });
     });
-  }
+}

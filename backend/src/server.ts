@@ -4,11 +4,13 @@ import { Server as SocketIOServer } from 'socket.io';
 import { connectPrisma, disconnectPrisma } from './config/prisma';
 import registerSocketHandlers from './sockets';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT
+
+const allowedOrigins = ['http://localhost:3001'];
 
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
-        cors: { origin: '*', methods: ['GET', 'POST'] },
+        cors: { origin: allowedOrigins, methods: ['GET', 'POST'] },
     });
 
 registerSocketHandlers(io);
