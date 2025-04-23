@@ -5,9 +5,9 @@ Content-Type: application/json
 
 {
     "name": "raffy",
-    "": "ffysolis123@gmail.com",
+    "email": "ffysolis123@gmail.com",
     "password": "string",
-    "role": "ADMIN"
+    "role": "DMIN"
 }
 
 ### Login User
