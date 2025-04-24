@@ -6,6 +6,7 @@ import { Request, Response } from 'express';
 import { errorHandler } from './utils/errorHandler';
 import authRoutes from './routes/authRoutes';
 import accountRoutes from './routes/accountRoutes';
+import requestLogger from './middlewares/logger';
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }))
+app.use(requestLogger)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/account', accountRoutes)

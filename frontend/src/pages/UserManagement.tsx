@@ -37,14 +37,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useQuery } from '@tanstack/react-query'
+import { getUsers } from '../api/accounts'
+import { User } from '../types'
 
 const UserManagement = () => {
   // Sample data
-  const users = [
-    { id: 1, name: "Alex Johnson", email: "alex@example.com", role: "ADMIN", status: "Active", lastActive: "2 hours ago" },
-    { id: 2, name: "Sarah Miller", email: "sarah@example.com", role: "USER", status: "Away", lastActive: "1 day ago" },
-    { id: 3, name: "Mike Wilson", email: "mike@example.com", role: "ADMIN", status: "Inactive", lastActive: "1 week ago" },
-  ];
+  const { data: users, isLoading, isError } = useQuery<User[], Error>({
+    queryKey: ['users'],
+    queryFn: getUsers,
+    staleTime: 60000,
+    gcTime: 300000,
+  })
+  
 
   const roles = ["All", "ADMIN", "USER"];
 
@@ -120,6 +125,11 @@ const UserManagement = () => {
     };
   }, []);
 
+  // Temporary loader
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="space-y-6">
       {/* Header and Add User Button */}
@@ -175,7 +185,7 @@ const UserManagement = () => {
             <div>
               <CardTitle>Users</CardTitle>
               <CardDescription>
-                {users.length} users found
+                {users?.length} users found
               </CardDescription>
             </div>
           </div>
@@ -190,7 +200,7 @@ const UserManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {users?.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -247,7 +257,7 @@ const UserManagement = () => {
         </CardContent>
         <CardFooter className="flex justify-between">
           <div className="text-sm text-gray-500">
-            Showing 1 to {users.length} of {users.length} users
+            Showing 1 to {users?.length} of {users?.length} users
           </div>
           <div className="space-x-2">
             <Button variant="outline" size="sm">
