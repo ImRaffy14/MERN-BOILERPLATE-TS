@@ -4,13 +4,11 @@ export type LoaderProps = {
     showLogo?: boolean;
 };
 
-export interface CreateAcc {
+export interface NewUser {
     name: string;
     email: string;
     password: string;
     role: string;
-    image: File
-
 }
 
 export interface User {
@@ -34,3 +32,7 @@ export interface ErrorResponse {
     errors?: Record<string, string[]>;
 }
 
+export interface MutationContext {
+    previousUser?: User | null;
+    previousUsers?: User[] | null;
+  }

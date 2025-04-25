@@ -40,28 +40,75 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useQuery } from '@tanstack/react-query'
 import { getUsers } from '../api/accounts'
 import { User } from '../types'
+import { useCreateAccount } from "@/hooks/auth/useCreateAccount";
+import { NewUser } from "@/types";
+import { base64ToFile } from "@/lib/fileUtils";
 
 const UserManagement = () => {
-  // Sample data
+
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+
+  const [newUser, setNewUser] = useState<NewUser>({
+    name: "",
+    email: "",
+    password: "",
+    role: "USER",
+  });
+ 
   const { data: users, isLoading, isError } = useQuery<User[], Error>({
     queryKey: ['users'],
     queryFn: getUsers,
     staleTime: 60000,
     gcTime: 300000,
   })
+
+  const { mutate: createAccount, isPending, error } = useCreateAccount();
+
+  const handleAddUser = () => {
+
+    const avatarFile = croppedImage
+      ? base64ToFile(croppedImage, "profile.png")
+      : null;
+
+    const formData = new FormData();
+    if (avatarFile) {
+      formData.append("image", avatarFile); 
+    }
+
+    Object.entries(newUser).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    createAccount(formData, {
+        onSuccess: () => {
+            setIsAddUserOpen(false);
+            resetForm();
+        },
+        onError: (error) => {
+            resetForm();
+            console.error('Signup Form Error:', {
+                error: error.message,
+                formData: formData,
+                time: new Date().toISOString()
+            });
+        }
+    });
+  };
+
+
+  const resetForm = () => {
+    setNewUser({
+      name: "",
+      email: "",
+      password: "",
+      role: "USER",
+    });
+    setImageSrc(null);
+    setCroppedImage(null);
+  };
+
   
-
   const roles = ["All", "ADMIN", "USER"];
-
-  // Modal state
-  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "User",
-    avatar: null as string | null
-  });
 
   // Avatar cropping state
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -97,28 +144,8 @@ const UserManagement = () => {
     }
   };
 
-  const handleAddUser = () => {
-
-    console.log("Adding user:", { ...newUser, avatar: croppedImage });
-    setIsAddUserOpen(false);
-    resetForm();
-  };
-
-  const resetForm = () => {
-    setNewUser({
-      name: "",
-      email: "",
-      password: "",
-      role: "User",
-      avatar: null
-    });
-    setImageSrc(null);
-    setCroppedImage(null);
-  };
-
   useEffect(() => {
     return () => {
-
       if (cropperRef.current?.cropper) {
         cropperRef.current.cropper.destroy();
       }
@@ -204,7 +231,8 @@ const UserManagement = () => {
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar>
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src={user.image.imageUrl} alt="avatar"/>
                         <AvatarFallback>
                           {user.name.charAt(0)}
                         </AvatarFallback>
@@ -305,7 +333,6 @@ const UserManagement = () => {
                       accept="image/*"
                       className="hidden" 
                       onChange={handleFileChange}
-                      required={!croppedImage}
                     />
                     <Label 
                       htmlFor="avatar" 
@@ -405,9 +432,8 @@ const UserManagement = () => {
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Editor">Editor</SelectItem>
-                    <SelectItem value="User">User</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
+                    <SelectItem value="USER">User</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

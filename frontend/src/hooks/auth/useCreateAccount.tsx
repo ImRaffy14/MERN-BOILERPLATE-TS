@@ -1,13 +1,26 @@
 import { createAccount } from "@/api/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { User } from "@/types";
+import toast from "react-hot-toast"
 
 export const useCreateAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createAccount,
-    onSuccess: (user) => {
+    onSuccess: (response) => {  // Now handling the full response object
+      const { user } = response;  // Destructure the user from response
+      
+      // Update current user
       queryClient.setQueryData(['currentUser'], user);
+      
+      // Update users list
+      queryClient.setQueryData(['users'], (oldUsers: User[] | undefined) => 
+        oldUsers ? [user, ...oldUsers] : [user]
+      );
+      
+      // Show success toast
+      toast.success(response.message);
     },
     onError: (error: Error) => {
       console.error('Create Account Error:', {
@@ -15,18 +28,11 @@ export const useCreateAccount = () => {
         time: new Date().toISOString(),
         stack: error.stack
       });
-    },
-    onMutate: async (newUser) => {
-      await queryClient.cancelQueries({ queryKey: ['currentUser'] });
-      const previousUser = queryClient.getQueryData(['currentUser']);
-      queryClient.setQueryData(['currentUser'], {
-        ...newUser,
-        id: 'temp-id',
-        createdAt: new Date().toISOString()
-      });
-      return { previousUser };
+      toast.error(error.message);
     },
     onSettled: () => {
+      // Invalidate queries to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     }
   });

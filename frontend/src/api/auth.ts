@@ -1,11 +1,16 @@
-import { CreateAcc, User, ErrorResponse } from "@/types";
+import { ErrorResponse } from "@/types";
 import axios, { AxiosError } from "axios"
 
 const urlAPI = import.meta.env.VITE_SERVER_URL
 
-export const createAccount = async (userData: CreateAcc): Promise<User>  => {
+export const createAccount = async (userData: FormData)  => {
     try {
-        const response = await axios.post<User>(`${urlAPI}/api/auth/register`, userData)
+        console.log(userData)
+        const response = await axios.post(`${urlAPI}/api/auth/register`, userData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+        })
         return response.data
     } catch (error) {
         const axiosError = error as AxiosError<ErrorResponse>
@@ -20,4 +25,8 @@ export const createAccount = async (userData: CreateAcc): Promise<User>  => {
             throw new Error('Request failed to be created');
         }
     }
+}
+
+export const checkAuth = () => {
+
 }

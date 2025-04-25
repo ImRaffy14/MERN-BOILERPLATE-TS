@@ -11,31 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useCreateAccount } from "@/hooks/auth/useCreateAccount";
-import toast from "react-hot-toast"
-import { CreateAcc } from "@/types";
+
 const Dashboard = () => {
 
-    const { mutate: createAccount, isPending, error } = useCreateAccount();
-
-    const handleSubmit = (data: CreateAcc) => {
-        createAccount(data, {
-            onSuccess: (user) => {
-                console.log(user)
-            },
-            onError: (error) => {
-                // This will use the error already transformed by the API layer
-                toast.error(error.message);
-                
-                // You can also log component-specific context
-                console.error('Signup Form Error:', {
-                    error: error.message,
-                    formData: data,
-                    time: new Date().toISOString()
-                });
-            }
-        });
-    };
     
     const stats = [
         { label: "Total Users", value: "3,721", change: "+5.2%" },
@@ -50,20 +28,13 @@ const Dashboard = () => {
         { name: "Mike Wilson", email: "mike@example.com", role: "User", status: "Inactive" }
     ];
 
-    const data = {
-        name: "raffy",
-        email: "raffy@example.com",
-        password: "123",
-        role: "User",
-        image: "tite"
-    }
 
     return (
         <>
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">Dashboard</h2>
                 <div>
-                    { isPending ? 'tite' : <Button onClick={() => handleSubmit(data)}>Export Data</Button> }   
+                    <Button>Export Data</Button> 
                 </div>
             </div>
             
