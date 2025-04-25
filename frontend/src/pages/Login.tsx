@@ -1,35 +1,38 @@
 import React from 'react';
 import { useState } from 'react';
 import { Eye, EyeOff, Shield } from 'lucide-react';
+import { login } from '@/api/auth';
+import toast from 'react-hot-toast';
+import { AxiosError } from "axios"
+import { useNavigate } from 'react-router-dom';
+
 
 export default function AdminLoginPage() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    
+    const navigate = useNavigate()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         
-        if (!username || !password) {
-        setError('Please enter both username and password');
-        return;
-        }
-    
-        setError('');
-        setIsLoading(true);
-        
+        setIsLoading(true)
+
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            console.log('Admin login attempt with:', { username });
-        } catch (err) {
-            setError('Invalid administrator credentials');
-        } finally {
-            setIsLoading(false);
+            const result = await login({ email, password })
+            toast.success(result.message)
+            navigate('/')
+        } catch (error) {
+            const axiosError = error as AxiosError
+            setError(axiosError.message)
+        } finally { 
+            setIsLoading(false)
         }
     };
-
+    
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4 md:p-8">
             <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg md:p-8">
@@ -53,13 +56,13 @@ export default function AdminLoginPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                     <label htmlFor="username" className="text-sm font-medium text-gray-700">
-                    Admin Username
+                    Admin Email
                     </label>
                     <input
                     id="username"
                     type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="admin_username"
                     required

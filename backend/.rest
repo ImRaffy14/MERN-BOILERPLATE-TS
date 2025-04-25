@@ -24,7 +24,7 @@ Content-Type: application/json
 ##
 GET http://localhost:5000/api/auth/profile
 Content-Type: application/json
-Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA0YjZjYzI4ZGQ1ODkyZjk3ZmNlMDgiLCJlbWFpbCI6ImVtYWlsIiwiaWF0IjoxNzQ1MTQ1OTg1LCJleHAiOjE3NDUyMzIzODV9.E-r7YiA_oIyf3dgkcfoVpuK-DEXrd0DjlWcGYpDXQOk
+Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBiZDJlZDE4N2RkYTE2NDczNGVlZjQiLCJlbWFpbCI6InJhZmZ5c29saXMxMjNAZ21haWwuY29tIiwiaWF0IjoxNzQ1NjA3MDIxLCJleHAiOjE3NDU2OTM0MjF9.7g-XoGO4reoDQDuYvO95ZFx1zqJj3akQreBUbrRfpWA
 
 
 ### Get Users

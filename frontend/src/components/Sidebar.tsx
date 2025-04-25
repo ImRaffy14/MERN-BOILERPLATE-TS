@@ -5,8 +5,10 @@ import {
   LogOut, 
   Menu,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from '@/components/ui/button';
+import { logout } from "@/api/auth";
+import toast from "react-hot-toast";
 
 function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -15,6 +17,14 @@ function Sidebar() {
     { id: "dashboard", path: "/", icon: <BarChart3 size={20} />, label: "Dashboard" },
     { id: "users", path: "/users", icon: <Users size={20} />, label: "Users" },
   ];
+
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    const result = await logout()
+    toast.success(result.message)
+    navigate('/login')
+  }
 
   return (
     <div className={`bg-white border-r ${collapsed ? "w-16" : "w-64"} flex flex-col transition-all duration-300`}>
@@ -53,9 +63,7 @@ function Sidebar() {
       <div className="p-4 border-t">
         <button 
           className={`flex items-center ${collapsed ? "justify-center" : "justify-start"} w-full text-red-600 hover:bg-red-50 px-3 py-2 rounded-md`}
-          onClick={() => {
-            console.log("User logged out"); // Add logout logic here
-          }}
+          onClick={() => handleLogout()}
         >
           <LogOut size={20} />
           {!collapsed && <span className="ml-3 font-medium">Logout</span>}

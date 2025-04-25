@@ -8,18 +8,15 @@ export const useCreateAccount = () => {
 
   return useMutation({
     mutationFn: createAccount,
-    onSuccess: (response) => {  // Now handling the full response object
-      const { user } = response;  // Destructure the user from response
+    onSuccess: (response) => {
+      const { user } = response;
       
-      // Update current user
       queryClient.setQueryData(['currentUser'], user);
       
-      // Update users list
       queryClient.setQueryData(['users'], (oldUsers: User[] | undefined) => 
         oldUsers ? [user, ...oldUsers] : [user]
       );
       
-      // Show success toast
       toast.success(response.message);
     },
     onError: (error: Error) => {
@@ -31,7 +28,6 @@ export const useCreateAccount = () => {
       toast.error(error.message);
     },
     onSettled: () => {
-      // Invalidate queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     }

@@ -4,6 +4,11 @@ export type LoaderProps = {
     showLogo?: boolean;
 };
 
+export interface Login {
+    email: string;
+    password: string;
+}
+
 export interface NewUser {
     name: string;
     email: string;
@@ -35,4 +40,4 @@ export interface ErrorResponse {
 export interface MutationContext {
     previousUser?: User | null;
     previousUsers?: User[] | null;
-  }
+}
