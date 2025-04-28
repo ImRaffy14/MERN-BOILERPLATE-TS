@@ -13,9 +13,9 @@ export const registerService = async (data: RegisterUser, image: any) => {
         where: { email },
     });
 
-    if (existingUser) {
-        throw new AppError('User already exists', 400);
-    }
+    // if (existingUser) {
+    //     throw new AppError('User already exists', 400);
+    // }
 
     if(!image){
         throw new AppError('Image is required', 400);

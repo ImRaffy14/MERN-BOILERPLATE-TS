@@ -3,7 +3,6 @@ import { User } from '../types';
 import { getProfile } from '@/api/auth';
 import { useNavigate } from 'react-router-dom';
 
-
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;

@@ -46,7 +46,11 @@ const ProtectedRoute = ({
 function App() {
   const { isLoading, user } = useAuth();
 
-  if (isLoading) return <FullPageLoader />;
+  if (isLoading) return (
+    <div className="h-screen">
+      <FullPageLoader message={'Authenticating'} showLogo={true}/>
+    </div>
+  );
 
   const routes: AppRoute[] = [
 
@@ -56,7 +60,6 @@ function App() {
       public: true, 
       element: user ? <Navigate to="/" replace /> : <Login /> 
     },
-    { path: "/test", public: true, element: <FullPageLoader /> },
 
     // Protected Routes
     {

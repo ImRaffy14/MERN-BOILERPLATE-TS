@@ -5,8 +5,7 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Shield,
-  Mail,
+  Eye,
   X,
   Image,
 } from "lucide-react";
@@ -43,19 +42,26 @@ import { User } from '../types'
 import { useCreateAccount } from "@/hooks/auth/useCreateAccount";
 import { NewUser } from "@/types";
 import { base64ToFile } from "@/lib/fileUtils";
+import PaginationControls from "@/components/PaginationControls";
+import { processItems } from "@/lib/data-utils";
+import FullPageLoader from "@/components/FullpageLoader";
 
 const UserManagement = () => {
-
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
-
   const [newUser, setNewUser] = useState<NewUser>({
     name: "",
     email: "",
     password: "",
     role: "USER",
   });
- 
-  const { data: users, isLoading, isError } = useQuery<User[], Error>({
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
+
+  const { data: usersData, isLoading, isError } = useQuery<User[], Error>({
     queryKey: ['users'],
     queryFn: getUsers,
     staleTime: 60000,
@@ -64,8 +70,21 @@ const UserManagement = () => {
 
   const { mutate: createAccount, isPending, error } = useCreateAccount();
 
-  const handleAddUser = () => {
+  // Process users with search, filter and pagination
+  const { processedItems: currentUsers, totalItems, totalPages } = processItems<User>(
+    usersData || [],
+    {
+      searchTerm,
+      searchKeys: ['name', 'email'],
+      filterKey: 'role',
+      filterValue: selectedRole === 'All' ? undefined : selectedRole,
+      allOptionValue: 'All',
+      currentPage,
+      itemsPerPage: usersPerPage
+    }
+  );
 
+  const handleAddUser = () => {
     const avatarFile = croppedImage
       ? base64ToFile(croppedImage, "profile.png")
       : null;
@@ -95,7 +114,6 @@ const UserManagement = () => {
     });
   };
 
-
   const resetForm = () => {
     setNewUser({
       name: "",
@@ -107,7 +125,6 @@ const UserManagement = () => {
     setCroppedImage(null);
   };
 
-  
   const roles = ["All", "ADMIN", "USER"];
 
   // Avatar cropping state
@@ -145,16 +162,11 @@ const UserManagement = () => {
   };
 
   useEffect(() => {
-    return () => {
-      if (cropperRef.current?.cropper) {
-        cropperRef.current.cropper.destroy();
-      }
-    };
-  }, []);
+    setCurrentPage(1);
+  }, [searchTerm, selectedRole]);
 
-  // Temporary loader
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <FullPageLoader message={'Fetching Users Data'} showLogo={true}/>;
   }
 
   return (
@@ -181,6 +193,8 @@ const UserManagement = () => {
               <Input
                 placeholder="Search users..."
                 className="pl-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             
@@ -188,17 +202,29 @@ const UserManagement = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="justify-start gap-2">
                   <Filter size={16} />
-                  Role: All
+                  Role: {selectedRole}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {roles.map(role => (
-                  <DropdownMenuItem key={role}>{role}</DropdownMenuItem>
+                  <DropdownMenuItem 
+                    key={role}
+                    onClick={() => setSelectedRole(role)}
+                  >
+                    {role}
+                  </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <Button variant="outline" className="gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedRole("All");
+              }}
+            >
               Reset Filters
             </Button>
           </div>
@@ -212,7 +238,7 @@ const UserManagement = () => {
             <div>
               <CardTitle>Users</CardTitle>
               <CardDescription>
-                {users?.length} users found
+                {totalItems} users found
               </CardDescription>
             </div>
           </div>
@@ -227,7 +253,7 @@ const UserManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users?.map((user) => (
+              {currentUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -260,16 +286,12 @@ const UserManagement = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem className="gap-2">
+                          <Eye size={16} />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="gap-2">
                           <Edit size={16} />
                           Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2">
-                          <Shield size={16} />
-                          Change Role
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2">
-                          <Mail size={16} />
-                          Send Email
                         </DropdownMenuItem>
                         <DropdownMenuItem className="gap-2 text-red-600">
                           <Trash2 size={16} />
@@ -285,16 +307,13 @@ const UserManagement = () => {
         </CardContent>
         <CardFooter className="flex justify-between">
           <div className="text-sm text-gray-500">
-            Showing 1 to {users?.length} of {users?.length} users
+            Showing {Math.min((currentPage - 1) * usersPerPage + 1, totalItems)} to {Math.min(currentPage * usersPerPage, totalItems)} of {totalItems} users
           </div>
-          <div className="space-x-2">
-            <Button variant="outline" size="sm">
-              Previous
-            </Button>
-            <Button variant="outline" size="sm">
-              Next
-            </Button>
-          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </CardFooter>
       </Card>
 

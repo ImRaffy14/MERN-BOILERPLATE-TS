@@ -5,8 +5,12 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from "@/context/authContext";
 
 function Navbar() {
+
+    const { user } = useAuth()
+
     return (
         <div className="px-6 py-3 flex items-center justify-end">
 
@@ -17,9 +21,9 @@ function Navbar() {
                 <Button variant="ghost" size="icon">
                     <HelpCircle size={20} />
                 </Button>
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src="/api/placeholder/32/32" alt="User" />
-                    <AvatarFallback>JP</AvatarFallback>
+                <Avatar className="h-11 w-11">
+                    <AvatarImage src={user?.image.imageUrl} alt="User" />
+                    <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
                 </Avatar>
             </div>
         </div>

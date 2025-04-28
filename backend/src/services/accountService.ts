@@ -16,6 +16,9 @@ export const getUserService = async () => {
                 },
             },
         },
+        orderBy: {
+            createdAt: 'desc',
+        },
     });
 
     return users;

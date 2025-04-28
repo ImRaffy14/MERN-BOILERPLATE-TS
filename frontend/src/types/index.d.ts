@@ -1,7 +1,7 @@
 
 export type LoaderProps = {
-    message?: string;
-    showLogo?: boolean;
+    message: string;
+    showLogo: boolean;
 };
 
 export interface Login {
@@ -41,3 +41,12 @@ export interface MutationContext {
     previousUser?: User | null;
     previousUsers?: User[] | null;
 }
+
+export type PaginationControlsProps = {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+    className?: string;
+    previousLabel?: string;
+    nextLabel?: string;
+};
