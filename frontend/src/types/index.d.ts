@@ -25,6 +25,8 @@ export interface User {
         imageUrl: string;
         publicId: string;
     }
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface UsersResponse {

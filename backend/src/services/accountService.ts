@@ -4,22 +4,14 @@ import { User } from "../types";
 
 export const getUserService = async () => {
     const users = await prisma.user.findMany({
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            image: {
-                select: {
-                    imageUrl: true,
-                    publicId: true,
-                },
-            },
-        },
         orderBy: {
             createdAt: 'desc',
         },
     });
 
     return users;
+}
+
+export const editUserService = async () => {
+    
 }

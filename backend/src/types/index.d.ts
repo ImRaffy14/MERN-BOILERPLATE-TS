@@ -16,7 +16,6 @@ export interface Image {
     publicId: string;
 }
 
-
 export interface LoginUser {
     email: string;
     password: string;

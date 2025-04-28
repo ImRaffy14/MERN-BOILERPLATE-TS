@@ -1,118 +1,142 @@
-import { 
-  UserPlus,
-  Search,
-  Filter,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Eye,
-  X,
-  Image,
-} from "lucide-react";
-import { useState, useRef, useEffect } from "react";
-import Cropper from "react-cropper";
-import "cropperjs/dist/cropper.css";
-import type { ReactCropperElement } from "react-cropper";
+"use client"
 
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useQuery } from '@tanstack/react-query'
-import { getUsers } from '../api/accounts'
-import { User } from '../types'
-import { useCreateAccount } from "@/hooks/auth/useCreateAccount";
-import { NewUser } from "@/types";
-import { base64ToFile } from "@/lib/fileUtils";
-import PaginationControls from "@/components/PaginationControls";
-import { processItems } from "@/lib/data-utils";
-import FullPageLoader from "@/components/FullpageLoader";
+import type React from "react"
+
+import { UserPlus, Search, Filter, MoreVertical, Edit, Trash2, Eye, X, ImageIcon, Loader2, Key } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import Cropper from "react-cropper"
+import "cropperjs/dist/cropper.css"
+import type { ReactCropperElement } from "react-cropper"
+
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { useQuery } from "@tanstack/react-query"
+import { getUsers } from "../api/accounts"
+import type { User } from "../types"
+import { useCreateAccount } from "@/hooks/auth/useCreateAccount"
+import type { NewUser } from "@/types"
+import { base64ToFile } from "@/lib/fileUtils"
+import PaginationControls from "@/components/PaginationControls"
+import { processItems } from "@/lib/data-utils"
+import FullPageLoader from "@/components/FullpageLoader"
 
 const UserManagement = () => {
-  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false)
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false)
+  const [isViewUserOpen, setIsViewUserOpen] = useState(false)
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+
   const [newUser, setNewUser] = useState<NewUser>({
     name: "",
     email: "",
     password: "",
     role: "USER",
-  });
-  
-  // Search and filter states
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRole, setSelectedRole] = useState("All");
-  const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 5;
+  })
 
-  const { data: usersData, isLoading, isError } = useQuery<User[], Error>({
-    queryKey: ['users'],
+  const [editUser, setEditUser] = useState({
+    name: "",
+    email: "",
+    role: "USER",
+  })
+
+  const [passwordData, setPasswordData] = useState({
+    newPassword: "",
+    confirmPassword: "",
+  })
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedRole, setSelectedRole] = useState("All")
+  const [currentPage, setCurrentPage] = useState(1)
+  const usersPerPage = 5
+
+  const {
+    data: usersData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery<User[], Error>({
+    queryKey: ["users"],
     queryFn: getUsers,
     staleTime: 60000,
     gcTime: 300000,
   })
 
-  const { mutate: createAccount, isPending, error } = useCreateAccount();
+  const { mutate: createAccount, isPending: isCreating } = useCreateAccount()
 
-  // Process users with search, filter and pagination
-  const { processedItems: currentUsers, totalItems, totalPages } = processItems<User>(
-    usersData || [],
-    {
-      searchTerm,
-      searchKeys: ['name', 'email'],
-      filterKey: 'role',
-      filterValue: selectedRole === 'All' ? undefined : selectedRole,
-      allOptionValue: 'All',
-      currentPage,
-      itemsPerPage: usersPerPage
-    }
-  );
+  const {
+    processedItems: currentUsers,
+    totalItems,
+    totalPages,
+  } = processItems<User>(usersData || [], {
+    searchTerm,
+    searchKeys: ["name", "email"],
+    filterKey: "role",
+    filterValue: selectedRole === "All" ? undefined : selectedRole,
+    allOptionValue: "All",
+    currentPage,
+    itemsPerPage: usersPerPage,
+  })
 
   const handleAddUser = () => {
-    const avatarFile = croppedImage
-      ? base64ToFile(croppedImage, "profile.png")
-      : null;
+    const avatarFile = croppedImage ? base64ToFile(croppedImage, "profile.png") : null
 
-    const formData = new FormData();
+    const formData = new FormData()
     if (avatarFile) {
-      formData.append("image", avatarFile); 
+      formData.append("image", avatarFile)
     }
 
     Object.entries(newUser).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
+      formData.append(key, value)
+    })
 
     createAccount(formData, {
-        onSuccess: () => {
-            setIsAddUserOpen(false);
-            resetForm();
-        },
-        onError: (error) => {
-            resetForm();
-            console.error('Signup Form Error:', {
-                error: error.message,
-                formData: formData,
-                time: new Date().toISOString()
-            });
-        }
-    });
-  };
+      onSuccess: () => {
+        setIsAddUserOpen(false)
+        resetForm()
+        refetch()
+      },
+      onError: (error) => {
+        console.error("Signup Form Error:", {
+          error: error.message,
+          formData: formData,
+          time: new Date().toISOString(),
+        })
+      },
+    })
+  }
+
+  const handleEditUser = () => {
+    if (!selectedUser) return
+
+    const avatarFile = croppedImage ? base64ToFile(croppedImage, "profile.png") : null
+
+    const formData = new FormData()
+    if (avatarFile) {
+      formData.append("image", avatarFile)
+    }
+
+    Object.entries(editUser).forEach(([key, value]) => {
+      formData.append(key, value)
+    })
+  }
+
+  const handleChangePassword = () => {
+    if (!selectedUser) return
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("New passwords don't match!")
+      return
+    }
+  }
 
   const resetForm = () => {
     setNewUser({
@@ -120,53 +144,82 @@ const UserManagement = () => {
       email: "",
       password: "",
       role: "USER",
-    });
-    setImageSrc(null);
-    setCroppedImage(null);
-  };
+    })
+    setEditUser({
+      name: "",
+      email: "",
+      role: "USER",
+    })
+    setPasswordData({
+      newPassword: "",
+      confirmPassword: "",
+    })
+    setImageSrc(null)
+    setCroppedImage(null)
+  }
 
-  const roles = ["All", "ADMIN", "USER"];
+  const openEditModal = (user: User) => {
+    setSelectedUser(user)
+    setEditUser({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    })
+    setIsEditUserOpen(true)
+  }
+
+  const openViewModal = (user: User) => {
+    setSelectedUser(user)
+    setIsViewUserOpen(true)
+  }
+
+  const openChangePasswordModal = (user: User) => {
+    setSelectedUser(user)
+    setIsChangePasswordOpen(true)
+  }
+
+  const roles = ["All", "ADMIN", "USER"]
 
   // Avatar cropping state
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [croppedImage, setCroppedImage] = useState<string | null>(null);
-  const cropperRef = useRef<ReactCropperElement>(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null)
+  const [croppedImage, setCroppedImage] = useState<string | null>(null)
+  const cropperRef = useRef<ReactCropperElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    if (!file.type.match('image.*')) {
-      alert('Please select an image file');
-      return;
+    if (!file.type.match("image.*")) {
+      alert("Please select an image file")
+      return
     }
 
-    const reader = new FileReader();
+    const reader = new FileReader()
     reader.onload = () => {
-      setImageSrc(reader.result as string);
-    };
+      setImageSrc(reader.result as string)
+    }
     reader.onerror = () => {
-      alert('Failed to read file');
-    };
-    reader.readAsDataURL(file);
-  };
+      alert("Failed to read file")
+    }
+    reader.readAsDataURL(file)
+  }
 
   const getCropData = () => {
     if (cropperRef.current?.cropper) {
-      const canvas = cropperRef.current.cropper.getCroppedCanvas();
+      const canvas = cropperRef.current.cropper.getCroppedCanvas()
       if (canvas) {
-        setCroppedImage(canvas.toDataURL());
-        setImageSrc(null);
+        setCroppedImage(canvas.toDataURL())
+        setImageSrc(null)
       }
     }
-  };
+  }
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedRole]);
+    setCurrentPage(1)
+  }, [searchTerm, selectedRole])
 
   if (isLoading) {
-    return <FullPageLoader message={'Fetching Users Data'} showLogo={true}/>;
+    return <FullPageLoader message={"Fetching Users Data"} showLogo={true} />
   }
 
   return (
@@ -197,7 +250,7 @@ const UserManagement = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="justify-start gap-2">
@@ -206,23 +259,20 @@ const UserManagement = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {roles.map(role => (
-                  <DropdownMenuItem 
-                    key={role}
-                    onClick={() => setSelectedRole(role)}
-                  >
+                {roles.map((role) => (
+                  <DropdownMenuItem key={role} onClick={() => setSelectedRole(role)}>
                     {role}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               className="gap-2"
               onClick={() => {
-                setSearchTerm("");
-                setSelectedRole("All");
+                setSearchTerm("")
+                setSelectedRole("All")
               }}
             >
               Reset Filters
@@ -237,9 +287,7 @@ const UserManagement = () => {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Users</CardTitle>
-              <CardDescription>
-                {totalItems} users found
-              </CardDescription>
+              <CardDescription>{totalItems} users found</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -258,10 +306,8 @@ const UserManagement = () => {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={user.image.imageUrl} alt="avatar"/>
-                        <AvatarFallback>
-                          {user.name.charAt(0)}
-                        </AvatarFallback>
+                        <AvatarImage src={user.image.imageUrl} alt="avatar" />
+                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="font-medium">{user.name}</div>
@@ -270,10 +316,7 @@ const UserManagement = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={
-                      user.role === "ADMIN" ? "default" : 
-                      user.role === "USER" ? "secondary" : "outline"
-                    }>
+                    <Badge variant={user.role === "ADMIN" ? "default" : user.role === "USER" ? "secondary" : "outline"}>
                       {user.role}
                     </Badge>
                   </TableCell>
@@ -285,13 +328,17 @@ const UserManagement = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="gap-2">
+                        <DropdownMenuItem className="gap-2" onClick={() => openViewModal(user)}>
                           <Eye size={16} />
                           View
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2">
+                        <DropdownMenuItem className="gap-2" onClick={() => openEditModal(user)}>
                           <Edit size={16} />
                           Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="gap-2" onClick={() => openChangePasswordModal(user)}>
+                          <Key size={16} />
+                          Change Password
                         </DropdownMenuItem>
                         <DropdownMenuItem className="gap-2 text-red-600">
                           <Trash2 size={16} />
@@ -307,66 +354,64 @@ const UserManagement = () => {
         </CardContent>
         <CardFooter className="flex justify-between">
           <div className="text-sm text-gray-500">
-            Showing {Math.min((currentPage - 1) * usersPerPage + 1, totalItems)} to {Math.min(currentPage * usersPerPage, totalItems)} of {totalItems} users
+            Showing {Math.min((currentPage - 1) * usersPerPage + 1, totalItems)} to{" "}
+            {Math.min(currentPage * usersPerPage, totalItems)} of {totalItems} users
           </div>
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
+          <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </CardFooter>
       </Card>
 
       {/* Add User Modal */}
-      <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+      <Dialog
+        open={isAddUserOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            // Blur any focused element inside the dialog before closing
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur()
+            }
+            resetForm()
+          }
+          setIsAddUserOpen(open)
+        }}
+      >
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>
-              Fill in the details below to create a new user account.
-            </DialogDescription>
+            <DialogDescription>Fill in the details below to create a new user account.</DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            handleAddUser();
-          }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleAddUser()
+            }}
+          >
             <div className="grid gap-4 py-4">
               {/* Avatar Upload */}
               <div className="space-y-2">
-                <Label htmlFor="avatar">Profile Picture <span className="text-red-500">*</span></Label>
+                <Label htmlFor="avatar">Profile Picture</Label>
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
                     {croppedImage ? (
-                      <AvatarImage src={croppedImage} />
+                      <AvatarImage src={croppedImage || "/placeholder.svg"} />
                     ) : (
                       <AvatarFallback>
-                        <Image size={24} className="text-gray-400" />
+                        <ImageIcon size={24} className="text-gray-400" />
                       </AvatarFallback>
                     )}
                   </Avatar>
                   <div className="space-y-2">
-                    <Input 
-                      id="avatar" 
-                      type="file" 
-                      accept="image/*"
-                      className="hidden" 
-                      onChange={handleFileChange}
-                    />
-                    <Label 
-                      htmlFor="avatar" 
+                    <Input id="avatar" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                    <Label
+                      htmlFor="avatar"
                       className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 border rounded-md text-sm"
                     >
-                      <Image size={16} />
+                      <ImageIcon size={16} />
                       {croppedImage ? "Change" : "Upload"} Image
                     </Label>
                     {croppedImage && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setCroppedImage(null)}
-                        type="button"
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setCroppedImage(null)} type="button">
                         <X size={16} className="mr-1" />
                         Remove
                       </Button>
@@ -378,7 +423,7 @@ const UserManagement = () => {
               {/* Image Cropper */}
               {imageSrc && !croppedImage && (
                 <div className="space-y-2">
-                  <Label>Crop Image <span className="text-red-500">*</span></Label>
+                  <Label>Crop Image</Label>
                   <div className="h-64">
                     <Cropper
                       src={imageSrc}
@@ -388,11 +433,7 @@ const UserManagement = () => {
                       ref={cropperRef}
                     />
                   </div>
-                  <Button 
-                    onClick={getCropData} 
-                    className="mt-2"
-                    type="button"
-                  >
+                  <Button onClick={getCropData} className="mt-2" type="button">
                     Crop Image
                   </Button>
                 </div>
@@ -400,11 +441,13 @@ const UserManagement = () => {
 
               {/* Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
+                <Label htmlFor="name">
+                  Full Name <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="name"
                   value={newUser.name}
-                  onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                   placeholder="John Doe"
                   required
                   minLength={2}
@@ -413,12 +456,14 @@ const UserManagement = () => {
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
+                <Label htmlFor="email">
+                  Email <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
                   value={newUser.email}
-                  onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                   placeholder="user@example.com"
                   required
                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
@@ -427,12 +472,14 @@ const UserManagement = () => {
 
               {/* Password */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password <span className="text-red-500">*</span></Label>
+                <Label htmlFor="password">
+                  Password <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="password"
                   type="password"
                   value={newUser.password}
-                  onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                   placeholder="••••••••"
                   required
                   minLength={8}
@@ -441,10 +488,12 @@ const UserManagement = () => {
 
               {/* Role */}
               <div className="space-y-2">
-                <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
-                <Select 
+                <Label htmlFor="role">
+                  Role <span className="text-red-500">*</span>
+                </Label>
+                <Select
                   value={newUser.role}
-                  onValueChange={(value) => setNewUser({...newUser, role: value})}
+                  onValueChange={(value) => setNewUser({ ...newUser, role: value })}
                   required
                 >
                   <SelectTrigger id="role" className="w-[180px]">
@@ -459,25 +508,341 @@ const UserManagement = () => {
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
-                  setIsAddUserOpen(false);
-                  resetForm();
+                  setIsAddUserOpen(false)
+                  resetForm()
                 }}
                 type="button"
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button disabled={isCreating} type="submit">
+                {isCreating && <Loader2 className="animate-spin mr-2" />}
                 Add User
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-};
 
-export default UserManagement;
+      {/* Edit User Modal */}
+      <Dialog
+        open={isEditUserOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            // Blur any focused element inside the dialog before closing
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur()
+            }
+            resetForm()
+            setSelectedUser(null)
+            setImageSrc(null)
+            setCroppedImage(null)
+          }
+          setIsEditUserOpen(open)
+        }}
+      >
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>Update the user details below.</DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleEditUser()
+            }}
+          >
+            <div className="grid gap-4 py-4">
+              {/* Avatar Upload */}
+              <div className="space-y-2">
+                <Label htmlFor="edit-avatar">Profile Picture</Label>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    {croppedImage ? (
+                      <AvatarImage src={croppedImage || "/placeholder.svg"} />
+                    ) : selectedUser?.image?.imageUrl ? (
+                      <AvatarImage src={selectedUser.image.imageUrl || "/placeholder.svg"} />
+                    ) : (
+                      <AvatarFallback>
+                        <ImageIcon size={24} className="text-gray-400" />
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="space-y-2">
+                    <Input
+                      id="edit-avatar"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                    <Label
+                      htmlFor="edit-avatar"
+                      className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 border rounded-md text-sm"
+                    >
+                      <ImageIcon size={16} />
+                      {croppedImage ? "Change" : "Upload"} Image
+                    </Label>
+                    {(croppedImage || selectedUser?.image?.imageUrl) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setCroppedImage(null)
+                        }}
+                        type="button"
+                      >
+                        <X size={16} className="mr-1" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Image Cropper */}
+              {imageSrc && !croppedImage && (
+                <div className="space-y-2">
+                  <Label>Crop Image</Label>
+                  <div className="h-64">
+                    <Cropper
+                      src={imageSrc}
+                      style={{ height: 256, width: "100%" }}
+                      initialAspectRatio={1}
+                      guides={true}
+                      ref={cropperRef}
+                    />
+                  </div>
+                  <Button onClick={getCropData} className="mt-2" type="button">
+                    Crop Image
+                  </Button>
+                </div>
+              )}
+
+              {/* Name */}
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">
+                  Full Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="edit-name"
+                  value={editUser.name}
+                  onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
+                  placeholder="John Doe"
+                  required
+                  minLength={2}
+                />
+              </div>
+
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">
+                  Email <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editUser.email}
+                  onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                  placeholder="user@example.com"
+                  required
+                  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                />
+              </div>
+
+              {/* Role */}
+              <div className="space-y-2">
+                <Label htmlFor="edit-role">
+                  Role <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={editUser.role}
+                  onValueChange={(value) => setEditUser({ ...editUser, role: value })}
+                  required
+                >
+                  <SelectTrigger id="edit-role" className="w-[180px]">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
+                    <SelectItem value="USER">User</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditUserOpen(false)
+                  resetForm()
+                }}
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Save Changes</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* View User Modal */}
+      <Dialog
+        open={isViewUserOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            // Blur any focused element inside the dialog before closing
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur()
+            }
+            setSelectedUser(null)
+          }
+          setIsViewUserOpen(open)
+        }}
+      >
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>View detailed information about this user.</DialogDescription>
+          </DialogHeader>
+
+          {selectedUser && (
+            <div className="space-y-4">
+              <div className="flex flex-col items-center gap-4">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={selectedUser.image.imageUrl || "/placeholder.svg"} />
+                  <AvatarFallback>{selectedUser.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold">{selectedUser.name}</h3>
+                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-gray-500">Role</Label>
+                    <p>
+                      <Badge
+                        variant={
+                          selectedUser.role === "ADMIN"
+                            ? "default"
+                            : selectedUser.role === "USER"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {selectedUser.role}
+                      </Badge>
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-gray-500">Account Created</Label>
+                  <p>{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setIsViewUserOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Modal */}
+      <Dialog
+        open={isChangePasswordOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur()
+            }
+            setSelectedUser(null)
+            setPasswordData({
+              newPassword: "",
+              confirmPassword: "",
+            })
+          }
+          setIsChangePasswordOpen(open)
+        }}
+      >
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>Change the password for {selectedUser?.name}.</DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleChangePassword()
+            }}
+          >
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">
+                  New Password <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      newPassword: e.target.value,
+                    })
+                  }
+                  placeholder="••••••••"
+                  required
+                  minLength={8}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">
+                  Confirm New Password <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  placeholder="••••••••"
+                  required
+                  minLength={8}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsChangePasswordOpen(false)} type="button">
+                Cancel
+              </Button>
+              <Button>Change Password</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+export default UserManagement
