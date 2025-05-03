@@ -9,22 +9,37 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from '@/components/ui/button';
 import { logout } from "@/api/auth";
 import toast from "react-hot-toast";
+import { useAuth } from "@/context/authContext";
 
 function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const isAdmin = user?.role?.includes("ADMIN");
 
-  const menuItems = [
+  const baseMenuItems = [
     { id: "dashboard", path: "/", icon: <BarChart3 size={20} />, label: "Dashboard" },
+  ];
+
+  const adminMenuItems = [
     { id: "users", path: "/users", icon: <Users size={20} />, label: "Users" },
   ];
 
-  const navigate = useNavigate()
+  const menuItems = [
+    ...baseMenuItems,
+    ...(isAdmin ? adminMenuItems : []),
+  ];
 
   const handleLogout = async () => {
-    const result = await logout()
-    toast.success(result.message)
-    navigate('/login')
-  }
+    try {
+      const result = await logout();
+      toast.success(result.message);
+      navigate('/login');
+    } catch (error) {
+      toast.error("Failed to logout");
+    }
+  };
 
   return (
     <div className={`bg-white border-r ${collapsed ? "w-16" : "w-64"} flex flex-col transition-all duration-300`}>
@@ -34,6 +49,7 @@ function Sidebar() {
           variant="ghost" 
           size="icon" 
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <Menu size={20} />
         </Button>
@@ -45,6 +61,7 @@ function Sidebar() {
             <NavLink
               key={item.id}
               to={item.path}
+              end
               className={({ isActive }) => 
                 `flex items-center ${collapsed ? "justify-center" : "justify-start"} px-3 py-2 w-full rounded-md ${
                   isActive 
@@ -61,13 +78,14 @@ function Sidebar() {
       </div>
       
       <div className="p-4 border-t">
-        <button 
-          className={`flex items-center ${collapsed ? "justify-center" : "justify-start"} w-full text-red-600 hover:bg-red-50 px-3 py-2 rounded-md`}
-          onClick={() => handleLogout()}
+        <Button 
+          variant="ghost"
+          className={`w-full justify-${collapsed ? "center" : "start"} text-red-600 hover:bg-red-50`}
+          onClick={handleLogout}
         >
-          <LogOut size={20} />
+          <LogOut size={20} className="flex-shrink-0" />
           {!collapsed && <span className="ml-3 font-medium">Logout</span>}
-        </button>
+        </Button>
       </div>
     </div>
   );
