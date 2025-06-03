@@ -6,7 +6,7 @@ const urlAPI = import.meta.env.VITE_SERVER_URL
 
 export const login = async (credentials: Login) => {
     try {
-        const response = await axios.post(`${urlAPI}/api/auth/login`, credentials, {
+        const response = await axios.post(`${urlAPI}/api/v1/auth/login`, credentials, {
             withCredentials: true
         })
         return response.data
@@ -26,7 +26,7 @@ export const login = async (credentials: Login) => {
 
 export const createAccount = async (userData: FormData)  => {
     try {
-        const response = await axios.post(`${urlAPI}/api/auth/register`, userData, {
+        const response = await axios.post(`${urlAPI}/api/v1/auth/register`, userData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -49,7 +49,7 @@ export const createAccount = async (userData: FormData)  => {
 
 export const getProfile = async () => {
     try {
-        const response = await axios.get(`${urlAPI}/api/auth/profile`, {
+        const response = await axios.get(`${urlAPI}/api/v1/auth/profile`, {
             withCredentials: true
         })
         return response.data
@@ -70,7 +70,7 @@ export const getProfile = async () => {
 
 export const logout = async () => {
     try {
-        const response = await axios.post(`${urlAPI}/api/auth/logout`, {}, {
+        const response = await axios.post(`${urlAPI}/api/v1/auth/logout`, {}, {
             withCredentials: true
         })
 

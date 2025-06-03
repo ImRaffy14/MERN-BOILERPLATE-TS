@@ -4,8 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { Request, Response } from 'express';
 import { errorHandler } from './utils/errorHandler';
-import authRoutes from './routes/authRoutes';
-import accountRoutes from './routes/accountRoutes';
+import Routes from './routes/index'
 import requestLogger from './middlewares/logger';
 
 const app = express();
@@ -22,8 +21,7 @@ app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }))
 app.use(requestLogger)
 
-app.use('/api/auth', authRoutes)
-app.use('/api/account', accountRoutes)
+app.use('/api/v1', Routes)
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!')
