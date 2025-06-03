@@ -139,4 +139,4 @@ You can deploy using services like:
 
 ## 📄 License
 
-MIT License
+This project is licensed under the [MIT License](./LICENSE).
