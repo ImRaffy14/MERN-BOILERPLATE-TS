@@ -108,15 +108,17 @@ yarn dev
 
 ---
 
-## ✅ Features
+## Features
 
-- User authentication with JWT (cookies)
-- File upload support (Multer + Cloudinary)
-- Class-based Express controllers
-- Centralized error handling
-- Fully typed with TypeScript
-- Scalable folder structure
-- Vite-powered React frontend with Tailwind CSS
+- Full-stack MERN boilerplate with TypeScript support
+- User management system including registration, login, profile management, password change, and user editing
+- RESTful API with Express and Prisma ORM
+- Authentication with JWT and secure cookie handling
+- File upload support (e.g., user avatars) using Multer and cloud storage integration
+- Middleware for request validation and error handling
+- React frontend with TypeScript, React Router, and Axios for API communication
+- Modular architecture for easy scalability and maintainability
+
 
 ---
 
