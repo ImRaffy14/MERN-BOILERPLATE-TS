@@ -84,7 +84,7 @@ CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 JWT_SECRET=your_jwt_secret
-NODE_ENV=development
+PORT=5001
 ```
 
 #### Frontend `.env`
