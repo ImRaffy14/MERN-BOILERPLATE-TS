@@ -89,7 +89,7 @@ PORT=5001
 
 #### Frontend `.env`
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000
 ```
 
 ### 4. Run Development Servers
